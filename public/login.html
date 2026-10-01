@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - نظام تذكير الأدوية</title>
+    <link rel="stylesheet" href="/public/css/login.css">
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>نظام تذكير الأدوية</h1>
+                <p>تسجيل دخول المسؤول</p>
+            </div>
+
+            <form id="loginForm" class="login-form" autocomplete="off">
+                <div class="field">
+                    <label for="username">اسم المستخدم</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        required
+                        autocomplete="username"
+                        spellcheck="false"
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="password">كلمة المرور</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
+
+                <div id="errorBox" class="error-box" hidden></div>
+
+                <button type="submit" id="submitBtn" class="submit-btn">
+                    تسجيل الدخول
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <p>هذه الصفحة مخصصة للمسؤول فقط</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/public/js/login.js"></script>
+</body>
+</html>
