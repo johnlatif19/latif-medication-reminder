@@ -1,0 +1,614 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg: #f4f6f9;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-muted: #7a8899;
+    --border: #e2e8f0;
+    --primary: #4a7c9e;
+    --primary-hover: #3a6582;
+    --success: #4f8b6a;
+    --success-bg: #eaf4ee;
+    --success-border: #c9e2d4;
+    --partial: #b8873f;
+    --partial-bg: #fbf3e4;
+    --partial-border: #ecd9b3;
+    --pending: #98a4b3;
+    --pending-bg: #f7f9fb;
+    --danger: #b3413a;
+    --danger-hover: #97352f;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "Segoe UI", "Tahoma", "Arial", sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 90px;
+}
+
+/* ===== Header ===== */
+
+.app-header {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px 18px;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+}
+
+.header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.header-titles h1 {
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.header-titles .subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.connection-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12.5px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background-color: var(--pending-bg);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.connection-badge .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--pending);
+    flex-shrink: 0;
+}
+
+.connection-badge[data-state="connected"] .dot {
+    background-color: var(--success);
+}
+
+.connection-badge[data-state="connected"] {
+    color: var(--success);
+    background-color: var(--success-bg);
+    border-color: var(--success-border);
+}
+
+.connection-badge[data-state="offline"] .dot {
+    background-color: var(--danger);
+}
+
+.connection-badge[data-state="offline"] {
+    color: var(--danger);
+}
+
+.logout-btn {
+    font-family: inherit;
+    font-size: 13.5px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background-color: #ffffff;
+    color: var(--text);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.logout-btn:hover {
+    background-color: #f0f3f7;
+}
+
+.progress-panel {
+    max-width: 1100px;
+    margin: 18px auto 0;
+    background-color: #fbfcfd;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+}
+
+.progress-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 10px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 9px;
+    background-color: #e8edf2;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--success);
+    border-radius: 6px;
+    transition: width 0.4s ease;
+}
+
+.progress-meta {
+    margin-top: 8px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+}
+
+/* ===== Main ===== */
+
+.app-main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 26px 24px 0;
+}
+
+.section {
+    margin-bottom: 34px;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+/* ===== Medication Cards ===== */
+
+.medications-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.med-card {
+    background-color: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.15s ease;
+}
+
+.med-card[data-status="pending"] {
+    background-color: var(--pending-bg);
+    border-color: var(--border);
+}
+
+.med-card[data-status="partially_completed"] {
+    background-color: var(--partial-bg);
+    border-color: var(--partial-border);
+}
+
+.med-card[data-status="completed"] {
+    background-color: var(--success-bg);
+    border-color: var(--success-border);
+}
+
+.med-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.med-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.4;
+}
+
+.med-time {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    display: block;
+}
+
+.med-check {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: transparent;
+    background-color: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.med-card[data-status="completed"] .med-check {
+    background-color: var(--success);
+    border-color: var(--success);
+    color: #ffffff;
+}
+
+.med-card[data-status="partially_completed"] .med-check {
+    border-color: var(--partial);
+    color: var(--partial);
+    background-color: #ffffff;
+}
+
+.med-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dose-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    padding: 7px 0;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.06);
+}
+
+.dose-row:last-child {
+    border-bottom: none;
+}
+
+.dose-label {
+    color: var(--text);
+}
+
+.dose-status {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 6px;
+}
+
+.dose-status.taken {
+    color: var(--success);
+    background-color: rgba(79, 139, 106, 0.12);
+}
+
+.dose-status.not-taken {
+    color: var(--text-muted);
+    background-color: rgba(152, 164, 179, 0.12);
+}
+
+.med-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.med-status-label {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.med-card[data-status="completed"] .med-status-label {
+    color: var(--success);
+}
+
+.med-card[data-status="partially_completed"] .med-status-label {
+    color: var(--partial);
+}
+
+.med-card[data-status="pending"] .med-status-label {
+    color: var(--text-muted);
+}
+
+.take-btn {
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1.5px solid var(--primary);
+    background-color: #ffffff;
+    color: var(--primary);
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.take-btn:hover:not(:disabled) {
+    background-color: var(--primary);
+    color: #ffffff;
+}
+
+.take-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: var(--border);
+    color: var(--text-muted);
+    background-color: #f4f6f9;
+}
+
+.updated-at {
+    font-size: 11.5px;
+    color: var(--text-muted);
+}
+
+/* ===== States ===== */
+
+.loading-state,
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 14.5px;
+    background-color: var(--card-bg);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+}
+
+/* ===== Events ===== */
+
+.events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.event-item {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.event-item.event-take {
+    border-right: 4px solid var(--success);
+}
+
+.event-item.event-reset {
+    border-right: 4px solid var(--partial);
+}
+
+.event-main {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.event-title {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.event-detail {
+    font-size: 12.5px;
+    color: var(--text-muted);
+}
+
+.event-time {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    background-color: #f4f6f9;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+/* ===== Reset FAB ===== */
+
+.reset-fab {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 40;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 14px 26px;
+    border-radius: 30px;
+    border: none;
+    background-color: var(--danger);
+    color: #ffffff;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(179, 65, 58, 0.28);
+    transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.reset-fab:hover {
+    background-color: var(--danger-hover);
+}
+
+.reset-fab:active {
+    transform: translateY(1px);
+}
+
+/* ===== Confirm Dialog ===== */
+
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(44, 62, 80, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 60;
+}
+
+.confirm-overlay[hidden] {
+    display: none;
+}
+
+.confirm-dialog {
+    background-color: #ffffff;
+    border-radius: 14px;
+    padding: 28px 26px 22px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 12px 40px rgba(44, 62, 80, 0.2);
+}
+
+.confirm-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 10px;
+}
+
+.confirm-text {
+    font-size: 14.5px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 22px;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+}
+
+.btn {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 11px 22px;
+    border-radius: 9px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.btn-secondary {
+    background-color: #eef1f5;
+    color: var(--text);
+}
+
+.btn-secondary:hover {
+    background-color: #e2e7ee;
+}
+
+.btn-danger {
+    background-color: var(--danger);
+    color: #ffffff;
+}
+
+.btn-danger:hover {
+    background-color: var(--danger-hover);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ===== Toast ===== */
+
+.toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 70;
+    background-color: var(--text);
+    color: #ffffff;
+    padding: 13px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    box-shadow: 0 6px 20px rgba(44, 62, 80, 0.25);
+    max-width: 320px;
+    line-height: 1.6;
+}
+
+.toast[hidden] {
+    display: none;
+}
+
+.toast.toast-error {
+    background-color: var(--danger);
+}
+
+.toast.toast-success {
+    background-color: var(--success);
+}
+
+/* ===== Responsive ===== */
+
+@media (max-width: 640px) {
+    .app-header {
+        padding: 16px 16px 14px;
+    }
+
+    .header-titles h1 {
+        font-size: 16px;
+    }
+
+    .app-main {
+        padding: 20px 16px 0;
+    }
+
+    .medications-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .reset-fab {
+        bottom: 18px;
+        left: 18px;
+        padding: 13px 22px;
+        font-size: 14.5px;
+    }
+
+    .toast {
+        right: 16px;
+        left: 16px;
+        bottom: 80px;
+        max-width: none;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
