@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام تذكير الأدوية (لطيف)</title>
+    <link rel="stylesheet" href="/public/css/dashbaord.css">
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="header-inner">
+            <div class="header-titles">
+                <h1>نظام تذكير الأدوية (لطيف)</h1>
+                <p class="subtitle">متابعة أدوية الوالد</p>
+            </div>
+
+            <div class="header-actions">
+                <div id="connectionBadge" class="connection-badge" data-state="connecting">
+                    <span class="dot"></span>
+                    <span id="connectionText">جارٍ الاتصال</span>
+                </div>
+                <button id="logoutBtn" class="logout-btn" type="button">خروج</button>
+            </div>
+        </div>
+
+        <div class="progress-panel">
+            <div class="progress-text">
+                <span id="progressSummary">جارٍ التحميل...</span>
+            </div>
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill" style="width:0%"></div>
+            </div>
+            <div class="progress-meta">
+                <span id="lastUpdateText">آخر تحديث: —</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-main">
+
+        <section class="section">
+            <h2 class="section-title">متابعة اليوم</h2>
+            <div id="medicationsGrid" class="medications-grid">
+                <div class="loading-state">جارٍ تحميل الأدوية...</div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">سجل الأحداث</h2>
+            <div id="eventsList" class="events-list">
+                <div class="empty-state">لا توجد أحداث بعد</div>
+            </div>
+        </section>
+
+    </main>
+
+    <button id="resetBtn" class="reset-fab" type="button" title="إعادة تعيين">
+        إعادة تعيين
+    </button>
+
+    <div id="confirmOverlay" class="confirm-overlay" hidden>
+        <div class="confirm-dialog" role="dialog" aria-modal="true">
+            <h3 class="confirm-title">تأكيد إعادة التعيين</h3>
+            <p class="confirm-text">هل أنت متأكد من إعادة تعيين جميع الأدوية؟</p>
+            <div class="confirm-actions">
+                <button id="confirmCancel" class="btn btn-secondary" type="button">إلغاء</button>
+                <button id="confirmOk" class="btn btn-danger" type="button">إعادة تعيين</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast" hidden></div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="/public/js/dashbaord.js"></script>
+</body>
+</html>
