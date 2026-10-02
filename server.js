@@ -9,10 +9,6 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const admin = require("firebase-admin");
 
-// ============================================================
-// Environment validation
-// ============================================================
-
 const REQUIRED_ENV = [
     "ADMIN_USERNAME",
     "ADMIN_PASSWORD_HASH",
@@ -25,7 +21,7 @@ const missing = REQUIRED_ENV.filter(function (k) {
 });
 
 if (missing.length > 0) {
-    console.error("[config] متغيرات بيئة مفقودة: " + missing.join(", "));
+    console.error("[config] missing env vars: " + missing.join(", "));
     process.exit(1);
 }
 
@@ -36,10 +32,6 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "12h";
 const PORT = parseInt(process.env.PORT, 10) || 3000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 
-// ============================================================
-// Firebase Admin init
-// ============================================================
-
 let serviceAccount;
 try {
     serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
@@ -47,7 +39,7 @@ try {
         serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
     }
 } catch (err) {
-    console.error("[config] FIREBASE_CONFIG ليس JSON صالحًا");
+    console.error("[config] FIREBASE_CONFIG is not valid JSON");
     process.exit(1);
 }
 
@@ -59,10 +51,6 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 db.settings({ ignoreUndefinedProperties: true });
-
-// ============================================================
-// Medications seed (مصدر الحقيقة الوحيد للتعريفات)
-// ============================================================
 
 const MEDICATIONS = [
     { id: "isapril",   name: "إيزابريل",  time: "12:50", dosesPerDay: 1, order: 1 },
@@ -77,10 +65,6 @@ const MEDICATIONS = [
 
 const MEDICATIONS_BY_ID = {};
 MEDICATIONS.forEach(function (m) { MEDICATIONS_BY_ID[m.id] = m; });
-
-// ============================================================
-// Utilities
-// ============================================================
 
 function todayKey() {
     const d = new Date();
@@ -106,15 +90,9 @@ function logSafe(label, err) {
     }
 }
 
-// ============================================================
-// Firestore helpers
-// ============================================================
-
-// يضمن وجود تعريفات الأدوية في collection medications
 async function ensureMedicationsSeeded() {
     const col = db.collection("medications");
     const snapshot = await col.get();
-
     if (!snapshot.empty) return;
 
     const batch = db.batch();
@@ -130,7 +108,6 @@ async function ensureMedicationsSeeded() {
     await batch.commit();
 }
 
-// يجلب تعريفات الأدوية من Firestore مرتبة، مع fallback للتعريفات الثابتة
 async function getMedications() {
     try {
         await ensureMedicationsSeeded();
@@ -154,7 +131,6 @@ async function getMedications() {
     }
 }
 
-// ينشئ/يجلب session اليوم
 async function getOrCreateTodaySession() {
     const dateKey = todayKey();
     const ref = db.collection("dailySessions").doc(dateKey);
@@ -200,10 +176,6 @@ async function getOrCreateTodaySession() {
     };
 }
 
-// ============================================================
-// Auth
-// ============================================================
-
 function signToken() {
     return jwt.sign(
         { sub: ADMIN_USERNAME, role: "admin" },
@@ -217,30 +189,25 @@ function authMiddleware(req, res, next) {
     const parts = header.split(" ");
 
     if (parts.length !== 2 || parts[0] !== "Bearer") {
-        return res.status(401).json({ error: "مطلوب تسجيل الدخول" });
+        return res.status(401).json({ error: "authentication required" });
     }
 
     const token = parts[1];
     try {
         const payload = jwt.verify(token, JWT_SECRET);
         if (!payload || payload.role !== "admin") {
-            return res.status(401).json({ error: "توكن غير صالح" });
+            return res.status(401).json({ error: "invalid token" });
         }
         req.user = payload;
         next();
     } catch (err) {
-        return res.status(401).json({ error: "انتهت الجلسة أو التوكن غير صالح" });
+        return res.status(401).json({ error: "session expired or invalid token" });
     }
 }
-
-// ============================================================
-// Express app
-// ============================================================
 
 const app = express();
 app.disable("x-powered-by");
 
-// CORS
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
     .split(",")
     .map(function (s) { return s.trim(); })
@@ -260,16 +227,10 @@ app.use(cors({
 
 app.use(express.json({ limit: "32kb" }));
 
-// ============================================================
-// Routes
-// ============================================================
-
-// Health
 app.get("/api/health", function (req, res) {
     res.json({ ok: true, time: nowIso() });
 });
 
-// Firebase Web Config (عام - للـClient realtime)
 app.get("/api/firebase-config", function (req, res) {
     const config = {
         apiKey: process.env.FIREBASE_WEB_API_KEY || "",
@@ -281,13 +242,12 @@ app.get("/api/firebase-config", function (req, res) {
     };
 
     if (!config.apiKey || !config.projectId) {
-        return res.status(503).json({ error: "Firebase web config غير مهيأ" });
+        return res.status(503).json({ error: "firebase web config not set" });
     }
 
     res.json({ config: config });
 });
 
-// Login
 app.post("/api/auth/login", async function (req, res) {
     try {
         const body = req.body || {};
@@ -295,37 +255,34 @@ app.post("/api/auth/login", async function (req, res) {
         const password = typeof body.password === "string" ? body.password : "";
 
         if (!username || !password) {
-            return res.status(400).json({ error: "الرجاء إدخال اسم المستخدم وكلمة المرور" });
+            return res.status(400).json({ error: "username and password required" });
         }
 
-        // لتقليل أثر timing attacks
         const usernameOk = username === ADMIN_USERNAME;
         const passwordOk = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
 
         if (!usernameOk || !passwordOk) {
-            return res.status(401).json({ error: "اسم المستخدم أو كلمة المرور غير صحيحة" });
+            return res.status(401).json({ error: "invalid credentials" });
         }
 
         const token = signToken();
         res.json({ token: token });
     } catch (err) {
         logSafe("login", err);
-        res.status(500).json({ error: "خطأ داخلي" });
+        res.status(500).json({ error: "internal error" });
     }
 });
 
-// Get medications (definitions)
 app.get("/api/medications", authMiddleware, async function (req, res) {
     try {
         const list = await getMedications();
         res.json({ medications: list });
     } catch (err) {
         logSafe("getMedications", err);
-        res.status(500).json({ error: "تعذر جلب الأدوية" });
+        res.status(500).json({ error: "failed to load medications" });
     }
 });
 
-// Get today's session
 app.get("/api/medications/today", authMiddleware, async function (req, res) {
     try {
         const session = await getOrCreateTodaySession();
@@ -339,16 +296,15 @@ app.get("/api/medications/today", authMiddleware, async function (req, res) {
         });
     } catch (err) {
         logSafe("today", err);
-        res.status(500).json({ error: "تعذر جلب حالة اليوم" });
+        res.status(500).json({ error: "failed to load today session" });
     }
 });
 
-// Take a medication dose (يدعم dashboard + mobile)
 app.post("/api/medications/:id/take", authMiddleware, async function (req, res) {
     try {
         const medId = req.params.id;
         if (!isValidMedicationId(medId)) {
-            return res.status(400).json({ error: "معرّف دواء غير صالح" });
+            return res.status(400).json({ error: "invalid medication id" });
         }
 
         const med = MEDICATIONS_BY_ID[medId];
@@ -390,7 +346,6 @@ app.post("/api/medications/:id/take", authMiddleware, async function (req, res) 
 
             const alreadyCompleted = current.dosesCompleted || 0;
 
-            // منع duplicate: لا يمكن تجاوز عدد الجرعات اليومية
             if (alreadyCompleted >= dosesPerDay) {
                 result = { status: "already_completed", doseNumber: alreadyCompleted };
                 return;
@@ -421,7 +376,6 @@ app.post("/api/medications/:id/take", authMiddleware, async function (req, res) 
                 tx.set(sessionRef, sessionPayload);
             }
 
-            // سجل الحدث
             const eventRef = db.collection("events").doc();
             tx.set(eventRef, {
                 type: "take",
@@ -446,12 +400,12 @@ app.post("/api/medications/:id/take", authMiddleware, async function (req, res) 
         });
 
         if (!result) {
-            return res.status(500).json({ error: "تعذر تنفيذ العملية" });
+            return res.status(500).json({ error: "transaction failed" });
         }
 
         if (result.status === "already_completed") {
             return res.status(409).json({
-                error: "تم تسجيل هذه الجرعة مسبقًا",
+                error: "dose already recorded",
                 dosesCompleted: result.doseNumber
             });
         }
@@ -467,11 +421,10 @@ app.post("/api/medications/:id/take", authMiddleware, async function (req, res) 
         });
     } catch (err) {
         logSafe("take", err);
-        res.status(500).json({ error: "تعذر تسجيل الجرعة" });
+        res.status(500).json({ error: "failed to record dose" });
     }
 });
 
-// Reset all medications for today
 app.post("/api/reset", authMiddleware, async function (req, res) {
     try {
         const dateKey = todayKey();
@@ -509,11 +462,10 @@ app.post("/api/reset", authMiddleware, async function (req, res) {
         res.json({ ok: true, date: dateKey, updatedAt: ts });
     } catch (err) {
         logSafe("reset", err);
-        res.status(500).json({ error: "تعذر إعادة التعيين" });
+        res.status(500).json({ error: "failed to reset" });
     }
 });
 
-// Get recent events
 app.get("/api/events", authMiddleware, async function (req, res) {
     try {
         const limitRaw = parseInt(req.query.limit, 10);
@@ -534,13 +486,9 @@ app.get("/api/events", authMiddleware, async function (req, res) {
         res.json({ events: events });
     } catch (err) {
         logSafe("events", err);
-        res.status(500).json({ error: "تعذر جلب الأحداث" });
+        res.status(500).json({ error: "failed to load events" });
     }
 });
-
-// ============================================================
-// Static files (public/)
-// ============================================================
 
 app.use(express.static(path.join(__dirname, "public"), {
     extensions: ["html"],
@@ -551,26 +499,19 @@ app.use(express.static(path.join(__dirname, "public"), {
     }
 }));
 
-// Redirect root to login (or dashboard if authenticated via token in localStorage)
 app.get("/", function (req, res) {
     res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
-// 404 for unknown API routes
 app.use("/api", function (req, res) {
-    res.status(404).json({ error: "المسار غير موجود" });
+    res.status(404).json({ error: "route not found" });
 });
 
-// Global error handler
 app.use(function (err, req, res, next) {
     logSafe("unhandled", err);
     if (res.headersSent) return next(err);
-    res.status(500).json({ error: "خطأ داخلي" });
+    res.status(500).json({ error: "internal error" });
 });
-
-// ============================================================
-// Start (محليًا فقط - على Vercel نصدّر app)
-// ============================================================
 
 if (require.main === module) {
     ensureMedicationsSeeded()
