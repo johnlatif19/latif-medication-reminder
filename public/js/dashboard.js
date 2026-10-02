@@ -4,20 +4,17 @@
     var TOKEN_KEY = "ltaf_admin_token";
     var API_BASE = "";
 
-    // ====== تعريفات الأدوية الثابتة (تطابق ما في Firestore bootstrap) ======
-    // ملاحظة: هذه للعرض فقط في حال تأخر الاتصال. المصدر الحقيقي هو /api/medications
     var FALLBACK_MEDICATIONS = [
-        { id: "isapril",    name: "إيزابريل",   time: "12:50", dosesPerDay: 1 },
-        { id: "pantobi",    name: "بانتوبي",    time: "01:07", dosesPerDay: 1 },
-        { id: "concor",     name: "كونكور",     time: "03:57", dosesPerDay: 1 },
-        { id: "juspirin",   name: "جوسبرين",    time: "05:08", dosesPerDay: 1 },
-        { id: "ator",       name: "اتور",       time: "1:35",  dosesPerDay: 1 },
-        { id: "plavix",     name: "بلافيكس",    time: "1:42",  dosesPerDay: 1 },
-        { id: "alventern",  name: "ألفينترن",   time: null,    dosesPerDay: 2 },
-        { id: "calciton",   name: "كالسيترون",  time: null,    dosesPerDay: 1 }
+        { id: "isapril",   name: "إيزابريل",  time: "12:50", dosesPerDay: 1 },
+        { id: "pantobi",   name: "بانتوبي",   time: "01:07", dosesPerDay: 1 },
+        { id: "concor",    name: "كونكور",    time: "03:57", dosesPerDay: 1 },
+        { id: "juspirin",  name: "جوسبرين",   time: "05:08", dosesPerDay: 1 },
+        { id: "ator",      name: "اتور",      time: "1:35",  dosesPerDay: 1 },
+        { id: "plavix",    name: "بلافيكس",   time: "1:42",  dosesPerDay: 1 },
+        { id: "alventern", name: "ألفينترن",  time: null,    dosesPerDay: 2 },
+        { id: "calciton",  name: "كالسيترون", time: null,    dosesPerDay: 1 }
     ];
 
-    // ====== DOM ======
     var grid = document.getElementById("medicationsGrid");
     var progressSummary = document.getElementById("progressSummary");
     var progressFill = document.getElementById("progressFill");
@@ -32,7 +29,6 @@
     var confirmOk = document.getElementById("confirmOk");
     var toastEl = document.getElementById("toast");
 
-    // ====== State ======
     var medicationsById = {};
     var currentSession = null;
     var unsubscribeSession = null;
@@ -41,7 +37,6 @@
     var isResetting = false;
     var submitInFlight = {};
 
-    // ====== Utils ======
     function getToken() {
         return localStorage.getItem(TOKEN_KEY);
     }
@@ -111,7 +106,6 @@
         connectionText.textContent = text;
     }
 
-    // ====== Data computation ======
     function computeStatus(med, sessionMed) {
         if (!sessionMed) return "pending";
         var dosesPerDay = med.dosesPerDay || 1;
@@ -131,7 +125,6 @@
         return session.medications[medId] || null;
     }
 
-    // ====== Rendering ======
     function renderProgress() {
         var total = 0;
         var taken = 0;
@@ -183,7 +176,6 @@
         card.setAttribute("data-status", status);
         card.setAttribute("data-med-id", med.id);
 
-        // Header
         var header = document.createElement("div");
         header.className = "med-card-header";
 
@@ -213,7 +205,6 @@
         header.appendChild(check);
         card.appendChild(header);
 
-        // Body
         var body = document.createElement("div");
         body.className = "med-card-body";
 
@@ -247,7 +238,6 @@
 
         card.appendChild(body);
 
-        // Footer
         var footer = document.createElement("div");
         footer.className = "med-card-footer";
 
@@ -370,7 +360,6 @@
         renderMedications();
     }
 
-    // ====== API calls ======
     function loadMedications() {
         return fetch(API_BASE + "/api/medications", {
             headers: authHeaders()
@@ -396,7 +385,6 @@
                 }
             })
             .catch(function () {
-                // في حال فشل الجلب، استخدم القائمة الاحتياطية للعرض
                 if (Object.keys(medicationsById).length === 0) {
                     FALLBACK_MEDICATIONS.forEach(function (m) {
                         medicationsById[m.id] = m;
@@ -426,7 +414,6 @@
                     return;
                 }
                 if (result.status >= 200 && result.status < 300) {
-                    // Firestore listener سيتولى تحديث الواجهة
                     return;
                 }
                 var msg = (result.data && result.data.error) || "تعذر تسجيل الجرعة";
@@ -481,7 +468,6 @@
             });
     }
 
-    // ====== Firestore realtime ======
     function loadFirebaseConfig() {
         return fetch(API_BASE + "/api/firebase-config")
             .then(function (r) { return r.json(); })
@@ -533,13 +519,11 @@
                         renderEvents(events);
                     },
                     function () {
-                        // silent
                     }
                 );
             })
             .catch(function () {
                 setConnection("offline", "غير متصل");
-                // حتى لو فشل الـrealtime، نعرض الواجهة من الـAPI
                 fetchToday().then(function () {
                     renderAll();
                 });
@@ -565,7 +549,6 @@
             });
     }
 
-    // ====== Confirm dialog ======
     function openConfirm() {
         confirmOverlay.hidden = false;
         confirmOk.focus();
@@ -575,7 +558,6 @@
         confirmOverlay.hidden = true;
     }
 
-    // ====== Event wiring ======
     grid.addEventListener("click", function (e) {
         var btn = e.target.closest("[data-action='take']");
         if (!btn) return;
@@ -604,7 +586,6 @@
         redirectToLogin();
     });
 
-    // ====== Init ======
     function init() {
         var token = getToken();
         if (!token) {
