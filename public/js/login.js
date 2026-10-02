@@ -39,7 +39,6 @@
         }
     }
 
-    // لو المستخدم عنده توكن صالح بالفعل، نحوله للداشبورد مباشرة
     var existingToken = localStorage.getItem(TOKEN_KEY);
     if (isTokenValid(existingToken)) {
         window.location.replace("/dashbaord");
@@ -80,7 +79,7 @@
             .then(function (result) {
                 if (result.status === 200 && result.data && result.data.token) {
                     localStorage.setItem(TOKEN_KEY, result.data.token);
-                    window.location.replace("/dashbaord.html");
+                    window.location.replace("/dashbaord");
                     return;
                 }
 
