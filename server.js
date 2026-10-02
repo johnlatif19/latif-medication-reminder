@@ -490,6 +490,14 @@ app.get("/api/events", authMiddleware, async function (req, res) {
     }
 });
 
+app.get("/login", function (req, res) {
+    res.sendFile(path.join(__dirname, "public", "login.html"));
+});
+
+app.get("/dashbaord", function (req, res) {
+    res.sendFile(path.join(__dirname, "public", "dashbaord.html"));
+});
+
 app.use(express.static(path.join(__dirname, "public"), {
     extensions: ["html"],
     setHeaders: function (res, filePath) {
@@ -500,7 +508,7 @@ app.use(express.static(path.join(__dirname, "public"), {
 }));
 
 app.get("/", function (req, res) {
-    res.sendFile(path.join(__dirname, "public", "login.html"));
+    res.redirect("/login");
 });
 
 app.use("/api", function (req, res) {
