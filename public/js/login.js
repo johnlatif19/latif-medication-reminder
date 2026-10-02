@@ -42,7 +42,7 @@
     // لو المستخدم عنده توكن صالح بالفعل، نحوله للداشبورد مباشرة
     var existingToken = localStorage.getItem(TOKEN_KEY);
     if (isTokenValid(existingToken)) {
-        window.location.replace("/dashbaord.html");
+        window.location.replace("/dashbaord");
         return;
     } else if (existingToken) {
         localStorage.removeItem(TOKEN_KEY);
