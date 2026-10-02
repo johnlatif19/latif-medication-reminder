@@ -55,7 +55,7 @@
 
     function redirectToLogin() {
         localStorage.removeItem(TOKEN_KEY);
-        window.location.replace("/login.html");
+        window.location.replace("/login");
     }
 
     function todayKey() {
