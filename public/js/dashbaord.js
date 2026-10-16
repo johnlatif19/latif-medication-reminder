@@ -11,8 +11,8 @@
         { id: "juspirin",  name: "جوسبرين",   time: "05:08", dosesPerDay: 1 },
         { id: "ator",      name: "اتور",      time: "1:35",  dosesPerDay: 1 },
         { id: "plavix",    name: "بلافيكس",   time: "1:42",  dosesPerDay: 1 },
-        { id: "alventern", name: "ألفينترن",  time: null,    dosesPerDay: 2 },
-        { id: "calciton",  name: "كالسيترون", time: null,    dosesPerDay: 1 }
+        { id: "Limitless Allzyme", name: "ايمتلس الزيم",  time: null,    dosesPerDay: 1 },
+        { id: "Bone_Care",  name: "بون كير", time: null,    dosesPerDay: 1 }
     ];
 
     var grid = document.getElementById("medicationsGrid");
